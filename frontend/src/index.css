@@ -3,9 +3,14 @@
 @theme {
   --color-navy: #0b2545;
   --color-navy-light: #13355e;
-  --color-gold: #b08d4f;
-  --color-cream: #f7f5f0;
+  --color-navy-dark: #050b16;
+  --color-charcoal: #2c2f36;
+  --color-offwhite: #f5f6f7;
+  --color-accent: #f2793f;
+  --color-accent-dark: #d9621f;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-signature: "Alex Brush", "Brush Script MT", cursive;
 }
 
 html {
@@ -27,4 +32,80 @@ body {
 .section-fade.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Buttons: a subtle lift + shadow on hover, a quick settle on press.
+   Applied to every filled CTA so the interaction feels the same everywhere. */
+.btn-lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.btn-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -8px rgba(11, 37, 69, 0.35);
+}
+
+.btn-lift:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px -6px rgba(11, 37, 69, 0.3);
+  transition-duration: 0.1s;
+}
+
+/* Text links: an underline that grows in from the left on hover instead of
+   the usual instant show/hide. */
+.link-underline {
+  position: relative;
+  text-decoration: none !important;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1.5px;
+  width: 100%;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* Grain: a faint noise texture for the navy sections, so they read as
+   editorial print rather than a flat SaaS gradient. Applied as an
+   absolutely-positioned overlay div, not a background-image, so it works
+   on any section regardless of its own background. */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Globe visual: pulsing connection points. */
+@keyframes globe-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.globe-pulse {
+  animation: globe-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transform-origin: center;
 }

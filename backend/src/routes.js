@@ -2,6 +2,7 @@ import { Router } from "express";
 import db from "./db.js";
 import { isValidEmail, cleanString } from "./validate.js";
 import { adminAuth } from "./adminAuth.js";
+import { sendNotification } from "./email.js";
 
 const router = Router();
 
@@ -22,6 +23,11 @@ router.post("/contact", (req, res) => {
   );
   const info = stmt.run(name, email, firm || null, message);
 
+  sendNotification({
+    subject: `New contact form submission from ${name}`,
+    text: `Name: ${name}\nEmail: ${email}\nFirm: ${firm || "-"}\n\nMessage:\n${message}`,
+  });
+
   return res.status(201).json({ ok: true, id: info.lastInsertRowid });
 });
 
@@ -36,6 +42,12 @@ router.post("/waitlist", (req, res) => {
   try {
     const stmt = db.prepare("INSERT INTO waitlist_signups (name, email) VALUES (?, ?)");
     const info = stmt.run(name, email);
+
+    sendNotification({
+      subject: `New waitlist signup from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}`,
+    });
+
     return res.status(201).json({ ok: true, id: info.lastInsertRowid });
   } catch (err) {
     if (String(err.message).includes("UNIQUE")) {
@@ -55,6 +67,12 @@ router.post("/newsletter", (req, res) => {
   try {
     const stmt = db.prepare("INSERT INTO newsletter_subscribers (email) VALUES (?)");
     const info = stmt.run(email);
+
+    sendNotification({
+      subject: "New newsletter subscriber",
+      text: `Email: ${email}`,
+    });
+
     return res.status(201).json({ ok: true, id: info.lastInsertRowid });
   } catch (err) {
     if (String(err.message).includes("UNIQUE")) {

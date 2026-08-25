@@ -31,21 +31,21 @@ export default function Contact() {
     <section id="contact" className="py-24">
       <div className="mx-auto max-w-2xl px-6">
         <Reveal>
-          <h2 className="text-sm font-semibold tracking-[0.2em] text-[var(--color-gold)] uppercase mb-3 text-center">
+          <h2 className="text-sm font-semibold tracking-[0.2em] text-[var(--color-charcoal)] uppercase mb-3 text-center">
             Contact
           </h2>
           <h3 className="text-2xl md:text-3xl font-bold text-[var(--color-navy)] mb-2 text-center">
             Let's Talk Deal Flow
           </h3>
           <p className="text-gray-600 text-center mb-10">
-            Tell me about your mandate — I'll follow up within 1 business day.
+            Tell me about your mandate, and I'll follow up within 1 business day.
           </p>
         </Reveal>
 
         <Reveal>
           {status === "success" ? (
             <p className="text-center text-[var(--color-navy)] font-medium">
-              Thanks — I'll be in touch shortly.
+              Thanks, I'll be in touch shortly.
             </p>
           ) : (
             <form onSubmit={handleSubmit} className="grid gap-4">
@@ -85,16 +85,16 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="bg-[var(--color-navy)] text-white font-medium px-6 py-3 rounded-md hover:bg-[var(--color-navy-light)] transition-colors disabled:opacity-60"
+                className="btn-lift bg-[var(--color-navy)] text-white font-medium px-6 py-3 rounded-md hover:bg-[var(--color-navy-light)] transition-colors disabled:opacity-60"
               >
                 {status === "loading" ? "Sending..." : "Send Message"}
               </button>
-              {status === "error" && <p className="text-red-600 text-sm">{error}</p>}
+              {status === "error" && <p className="text-[var(--color-charcoal)] font-medium text-sm">{error}</p>}
             </form>
           )}
           <p className="text-center text-sm text-gray-400 mt-6">
             Or email directly:{" "}
-            <a href="mailto:harshiitnemani@gmail.com" className="text-[var(--color-navy)] underline">
+            <a href="mailto:harshiitnemani@gmail.com" className="link-underline inline-block text-[var(--color-navy)]">
               harshiitnemani@gmail.com
             </a>
           </p>

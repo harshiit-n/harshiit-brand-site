@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Small IntersectionObserver hook that fades/slides a section in the
 // first time it scrolls into view. Keeps the interaction subtle on
-// purpose — this is a credibility site, not a showcase.
+// purpose - this is a credibility site, not a showcase.
 export default function useReveal(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);

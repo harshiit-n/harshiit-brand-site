@@ -22,18 +22,19 @@ export default function Newsletter() {
   }
 
   return (
-    <section className="py-16 bg-[var(--color-gold)]">
-      <Reveal className="mx-auto max-w-3xl px-6 text-center">
-        <h2 className="text-xl md:text-2xl font-bold text-[var(--color-navy)] mb-2">
+    <section className="relative overflow-hidden py-16 bg-[var(--color-navy)]">
+      <div className="grain-overlay" />
+      <Reveal className="relative z-10 mx-auto max-w-3xl px-6 text-center">
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
           Get sourcing insights, straight from the deal room.
         </h2>
-        <p className="text-[var(--color-navy)]/80 text-sm mb-6 max-w-md mx-auto">
+        <p className="text-white/80 text-sm mb-6 max-w-md mx-auto">
           Occasional notes on deal origination, market activity across
           PE/VC/search funds, and what I'm learning building the network.
         </p>
 
         {status === "success" ? (
-          <p className="text-[var(--color-navy)] font-medium">Thanks — you're subscribed.</p>
+          <p className="text-white font-medium">Thanks, you're subscribed.</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 justify-center">
             <input
@@ -42,18 +43,18 @@ export default function Newsletter() {
               placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="px-4 py-3 rounded-md text-gray-900 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-[var(--color-navy)]"
+              className="px-4 py-3 rounded-md bg-white text-gray-900 text-sm w-full sm:w-72 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-navy-light)]"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="bg-[var(--color-navy)] text-white font-semibold px-6 py-3 rounded-md hover:bg-[var(--color-navy-light)] transition-colors disabled:opacity-60"
+              className="btn-lift bg-white text-[var(--color-navy)] font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition-colors disabled:opacity-60"
             >
               {status === "loading" ? "Submitting..." : "Subscribe"}
             </button>
           </form>
         )}
-        {status === "error" && <p className="text-red-900 text-sm mt-3">{error}</p>}
+        {status === "error" && <p className="text-white font-medium text-sm mt-3">{error}</p>}
       </Reveal>
     </section>
   );
