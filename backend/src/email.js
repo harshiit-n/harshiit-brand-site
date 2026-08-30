@@ -27,6 +27,11 @@ function getTransporter() {
     host: SMTP_HOST,
     port: Number(SMTP_PORT),
     secure: Number(SMTP_PORT) === 465,
+    // Render's outbound networking doesn't reliably support IPv6. Gmail's
+    // SMTP host resolves to an IPv6 address first, which then fails with
+    // ENETUNREACH on Render even though the SMTP credentials are fine.
+    // Forcing IPv4 here avoids that failure mode.
+    family: 4,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
   return transporter;
