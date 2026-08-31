@@ -37,6 +37,32 @@ function getTransporter() {
   return transporter;
 }
 
+// Temporary diagnostic helper — reports whether SMTP env vars are present
+// and whether Gmail actually accepts the credentials, without leaking the
+// values themselves. Remove once email delivery is confirmed working.
+export async function checkEmailConfig() {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, NOTIFY_EMAIL } = process.env;
+  const present = {
+    SMTP_HOST: Boolean(SMTP_HOST),
+    SMTP_PORT: Boolean(SMTP_PORT),
+    SMTP_USER: Boolean(SMTP_USER),
+    SMTP_PASS: Boolean(SMTP_PASS),
+    NOTIFY_EMAIL: Boolean(NOTIFY_EMAIL),
+  };
+
+  const t = getTransporter();
+  if (!t) {
+    return { present, verified: false, verifyError: "Transporter not created — one or more SMTP_* vars missing." };
+  }
+
+  try {
+    await t.verify();
+    return { present, verified: true, verifyError: null };
+  } catch (err) {
+    return { present, verified: false, verifyError: err.message };
+  }
+}
+
 export async function sendNotification({ subject, text }) {
   const t = getTransporter();
   if (!t) return;

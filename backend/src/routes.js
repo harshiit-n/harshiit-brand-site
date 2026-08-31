@@ -2,7 +2,7 @@ import { Router } from "express";
 import db from "./db.js";
 import { isValidEmail, cleanString } from "./validate.js";
 import { adminAuth } from "./adminAuth.js";
-import { sendNotification } from "./email.js";
+import { sendNotification, checkEmailConfig } from "./email.js";
 
 const router = Router();
 
@@ -99,6 +99,11 @@ router.get("/admin/waitlist", (_req, res) => {
 router.get("/admin/newsletter", (_req, res) => {
   const rows = db.prepare("SELECT * FROM newsletter_subscribers ORDER BY id DESC").all();
   res.json(rows);
+});
+
+router.get("/admin/email-status", async (_req, res) => {
+  const status = await checkEmailConfig();
+  res.json(status);
 });
 
 export default router;
