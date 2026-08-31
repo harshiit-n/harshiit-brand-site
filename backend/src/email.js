@@ -1,4 +1,11 @@
 import nodemailer from "nodemailer";
+import dns from "node:dns";
+
+// Render's outbound networking has no route to Gmail's IPv6 SMTP address,
+// so the default "IPv6 first" DNS resolution order causes every connection
+// attempt to fail with ENETUNREACH before Node ever tries the IPv4 address.
+// This forces IPv4-first resolution for the whole process.
+dns.setDefaultResultOrder("ipv4first");
 
 // Sends a quick heads-up email whenever a form is submitted, so submissions
 // don't just sit silently in SQLite. Configured via SMTP env vars; if they
