@@ -5,7 +5,7 @@ import Monogram from "./Monogram";
 const LINKS = [
   { to: "/#about", label: "About" },
   { to: "/services", label: "Services" },
-  { to: "/videos", label: "Vlogs" },
+  { to: "/blog", label: "Blog" },
   { to: "/#how-it-works", label: "How I Work" },
   { to: "/#vision", label: "The Vision" },
   { to: "/#contact", label: "Contact" },

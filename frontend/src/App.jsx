@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Nav from "./components/Nav";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -8,8 +8,8 @@ import Newsletter from "./components/Newsletter";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ServicesPage from "./components/ServicesPage";
-import VideosPage from "./components/VideosPage";
-import AdminVideosPage from "./components/AdminVideosPage";
+import BlogPage from "./components/BlogPage";
+import AdminBlogPage from "./components/AdminBlogPage";
 import ScrollToHash from "./components/ScrollToHash";
 import SectionIndex from "./components/SectionIndex";
 
@@ -45,8 +45,10 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/services" element={<ServicesPage />} />
-            <Route path="/videos" element={<VideosPage />} />
-            <Route path="/admin/videos" element={<AdminVideosPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/admin/blog" element={<AdminBlogPage />} />
+            <Route path="/videos" element={<Navigate to="/blog" replace />} />
+            <Route path="/admin/videos" element={<Navigate to="/admin/blog" replace />} />
           </Routes>
         </main>
         <Footer />

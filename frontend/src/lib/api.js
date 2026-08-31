@@ -50,3 +50,19 @@ export function adminCreateVideo(payload, auth) {
 export function adminDeleteVideo(id, auth) {
   return request(`/api/admin/videos/${id}`, { method: "DELETE", auth });
 }
+
+export function getPosts() {
+  return request("/api/posts");
+}
+
+export function adminListPosts(auth) {
+  return request("/api/admin/posts", { auth });
+}
+
+export function adminCreatePost(payload, auth) {
+  return request("/api/admin/posts", { method: "POST", body: payload, auth });
+}
+
+export function adminDeletePost(id, auth) {
+  return request(`/api/admin/posts/${id}`, { method: "DELETE", auth });
+}

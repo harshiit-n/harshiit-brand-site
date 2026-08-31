@@ -96,6 +96,11 @@ router.get("/videos", (_req, res) => {
   res.json(rows);
 });
 
+router.get("/posts", (_req, res) => {
+  const rows = db.prepare("SELECT id, title, body, created_at FROM posts ORDER BY id DESC").all();
+  res.json(rows);
+});
+
 // --- Simple admin endpoints (protected via HTTP Basic Auth) ---------------
 
 router.use("/admin", adminAuth);
@@ -144,6 +149,35 @@ router.delete("/admin/videos/:id", (req, res) => {
   }
 
   db.prepare("DELETE FROM videos WHERE id = ?").run(id);
+  res.json({ ok: true });
+});
+
+router.get("/admin/posts", (_req, res) => {
+  const rows = db.prepare("SELECT id, title, body, created_at FROM posts ORDER BY id DESC").all();
+  res.json(rows);
+});
+
+router.post("/admin/posts", (req, res) => {
+  const title = cleanString(req.body?.title, 200);
+  const body = cleanString(req.body?.body, 20000);
+
+  if (!title || !body) {
+    return res.status(400).json({ error: "Please provide a title and body." });
+  }
+
+  const stmt = db.prepare("INSERT INTO posts (title, body) VALUES (?, ?)");
+  const info = stmt.run(title, body);
+
+  res.status(201).json({ ok: true, id: info.lastInsertRowid });
+});
+
+router.delete("/admin/posts/:id", (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ error: "Invalid post id." });
+  }
+
+  db.prepare("DELETE FROM posts WHERE id = ?").run(id);
   res.json({ ok: true });
 });
 
