@@ -82,6 +82,13 @@ router.post("/newsletter", (req, res) => {
   }
 });
 
+// Temporary, unauthenticated diagnostic route — see email.js. Reports only
+// booleans and an error message, no secret values. Remove once resolved.
+router.get("/email-status", async (_req, res) => {
+  const status = await checkEmailConfig();
+  res.json(status);
+});
+
 // --- Simple admin endpoints (protected via HTTP Basic Auth) ---------------
 
 router.use("/admin", adminAuth);
@@ -101,9 +108,5 @@ router.get("/admin/newsletter", (_req, res) => {
   res.json(rows);
 });
 
-router.get("/admin/email-status", async (_req, res) => {
-  const status = await checkEmailConfig();
-  res.json(status);
-});
 
 export default router;
