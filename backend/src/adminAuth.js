@@ -2,6 +2,10 @@
 // aren't publicly readable. Set ADMIN_USER and ADMIN_PASSWORD in .env
 // before deploying. If either is unset, admin routes are disabled
 // entirely (return 503) rather than left open.
+//
+// Deliberately omits the WWW-Authenticate response header: sending it makes
+// browsers pop up their own native credential prompt on top of any custom
+// login form calling this from fetch(), which is not what we want here.
 export function adminAuth(req, res, next) {
   const user = process.env.ADMIN_USER;
   const pass = process.env.ADMIN_PASSWORD;
@@ -16,7 +20,6 @@ export function adminAuth(req, res, next) {
   const [scheme, encoded] = header.split(" ");
 
   if (scheme !== "Basic" || !encoded) {
-    res.set("WWW-Authenticate", "Basic realm=\"Admin\"");
     return res.status(401).json({ error: "Authentication required." });
   }
 
@@ -24,7 +27,6 @@ export function adminAuth(req, res, next) {
   const [reqUser, reqPass] = decoded.split(":");
 
   if (reqUser !== user || reqPass !== pass) {
-    res.set("WWW-Authenticate", "Basic realm=\"Admin\"");
     return res.status(401).json({ error: "Invalid credentials." });
   }
 

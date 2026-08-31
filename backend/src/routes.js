@@ -1,6 +1,6 @@
 import { Router } from "express";
 import db from "./db.js";
-import { isValidEmail, cleanString } from "./validate.js";
+import { isValidEmail, cleanString, extractYouTubeId } from "./validate.js";
 import { adminAuth } from "./adminAuth.js";
 import { sendNotification, checkEmailConfig } from "./email.js";
 
@@ -89,6 +89,13 @@ router.get("/email-status", async (_req, res) => {
   res.json(status);
 });
 
+router.get("/videos", (_req, res) => {
+  const rows = db
+    .prepare("SELECT id, title, description, youtube_id, created_at FROM videos ORDER BY id DESC")
+    .all();
+  res.json(rows);
+});
+
 // --- Simple admin endpoints (protected via HTTP Basic Auth) ---------------
 
 router.use("/admin", adminAuth);
@@ -108,5 +115,36 @@ router.get("/admin/newsletter", (_req, res) => {
   res.json(rows);
 });
 
+router.get("/admin/videos", (_req, res) => {
+  const rows = db
+    .prepare("SELECT id, title, description, youtube_id, created_at FROM videos ORDER BY id DESC")
+    .all();
+  res.json(rows);
+});
+
+router.post("/admin/videos", (req, res) => {
+  const title = cleanString(req.body?.title, 200);
+  const description = cleanString(req.body?.description, 1000);
+  const youtubeId = extractYouTubeId(req.body?.url || "");
+
+  if (!title || !youtubeId) {
+    return res.status(400).json({ error: "Please provide a title and a valid YouTube link." });
+  }
+
+  const stmt = db.prepare("INSERT INTO videos (title, description, youtube_id) VALUES (?, ?, ?)");
+  const info = stmt.run(title, description || null, youtubeId);
+
+  res.status(201).json({ ok: true, id: info.lastInsertRowid });
+});
+
+router.delete("/admin/videos/:id", (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ error: "Invalid video id." });
+  }
+
+  db.prepare("DELETE FROM videos WHERE id = ?").run(id);
+  res.json({ ok: true });
+});
 
 export default router;

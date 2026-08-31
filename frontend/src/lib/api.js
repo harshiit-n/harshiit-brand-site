@@ -3,11 +3,15 @@
 // to the deployed backend's base URL (e.g. https://api.yourdomain.com).
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
-async function post(path, body) {
+async function request(path, { method = "GET", body, auth } = {}) {
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (auth) headers["Authorization"] = `Basic ${btoa(`${auth.user}:${auth.pass}`)}`;
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   const data = await res.json().catch(() => ({}));
@@ -20,13 +24,29 @@ async function post(path, body) {
 }
 
 export function submitWaitlist(payload) {
-  return post("/api/waitlist", payload);
+  return request("/api/waitlist", { method: "POST", body: payload });
 }
 
 export function submitContact(payload) {
-  return post("/api/contact", payload);
+  return request("/api/contact", { method: "POST", body: payload });
 }
 
 export function submitNewsletter(payload) {
-  return post("/api/newsletter", payload);
+  return request("/api/newsletter", { method: "POST", body: payload });
+}
+
+export function getVideos() {
+  return request("/api/videos");
+}
+
+export function adminListVideos(auth) {
+  return request("/api/admin/videos", { auth });
+}
+
+export function adminCreateVideo(payload, auth) {
+  return request("/api/admin/videos", { method: "POST", body: payload, auth });
+}
+
+export function adminDeleteVideo(id, auth) {
+  return request(`/api/admin/videos/${id}`, { method: "DELETE", auth });
 }

@@ -8,6 +8,8 @@ import Newsletter from "./components/Newsletter";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ServicesPage from "./components/ServicesPage";
+import VideosPage from "./components/VideosPage";
+import AdminVideosPage from "./components/AdminVideosPage";
 import ScrollToHash from "./components/ScrollToHash";
 import SectionIndex from "./components/SectionIndex";
 
@@ -43,6 +45,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/services" element={<ServicesPage />} />
+            <Route path="/videos" element={<VideosPage />} />
+            <Route path="/admin/videos" element={<AdminVideosPage />} />
           </Routes>
         </main>
         <Footer />
