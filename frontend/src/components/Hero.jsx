@@ -19,7 +19,7 @@ export default function Hero() {
         <img
           src={headshotCutout}
           alt="Harshiit Nemani"
-          className="mt-6 w-[85%] object-contain"
+          className="mt-10 w-[70%] object-contain"
         />
       </div>
 
@@ -55,7 +55,7 @@ export default function Hero() {
 
           {/* Mobile photo: standalone cutout centered below the text. */}
           <div className="mt-12 flex justify-center md:hidden">
-            <img src={headshotCutout} alt="Harshiit Nemani" className="h-80 w-auto object-contain" />
+            <img src={headshotCutout} alt="Harshiit Nemani" className="h-64 w-auto object-contain" />
           </div>
         </div>
       </div>
