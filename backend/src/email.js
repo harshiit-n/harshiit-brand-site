@@ -1,88 +1,69 @@
-import nodemailer from "nodemailer";
-import dns from "node:dns";
-
-// Render's outbound networking has no route to Gmail's IPv6 SMTP address,
-// so the default "IPv6 first" DNS resolution order causes every connection
-// attempt to fail with ENETUNREACH before Node ever tries the IPv4 address.
-// This forces IPv4-first resolution for the whole process.
-dns.setDefaultResultOrder("ipv4first");
-
 // Sends a quick heads-up email whenever a form is submitted, so submissions
-// don't just sit silently in SQLite. Configured via SMTP env vars; if they
-// aren't set, this quietly no-ops (logs once) rather than breaking the form.
-// Works with Gmail (an App Password, not your normal password) or any SMTP
-// provider (Resend, Postmark, Mailgun, etc.) — see backend/.env.example.
+// don't just sit silently in SQLite. Uses Resend's HTTP API rather than raw
+// SMTP — Render's network blocks outbound SMTP (port 465/587) entirely, but
+// HTTPS (443) works fine, which is what Resend's API runs over.
+// If RESEND_API_KEY isn't set, this quietly no-ops (logs once) rather than
+// breaking the form.
 
-let transporter = null;
+const RESEND_API_URL = "https://api.resend.com/emails";
+const DEFAULT_FROM = "onboarding@resend.dev";
+
 let warnedMissingConfig = false;
 
-function getTransporter() {
-  if (transporter) return transporter;
-
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    if (!warnedMissingConfig) {
-      console.warn(
-        "[email] SMTP_* env vars not fully set — submission notifications are disabled. See backend/.env.example."
-      );
-      warnedMissingConfig = true;
-    }
-    return null;
-  }
-
-  transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: Number(SMTP_PORT) === 465,
-    // Render's outbound networking doesn't reliably support IPv6. Gmail's
-    // SMTP host resolves to an IPv6 address first, which then fails with
-    // ENETUNREACH on Render even though the SMTP credentials are fine.
-    // Forcing IPv4 here avoids that failure mode.
-    family: 4,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
-  return transporter;
-}
-
-// Temporary diagnostic helper — reports whether SMTP env vars are present
-// and whether Gmail actually accepts the credentials, without leaking the
-// values themselves. Remove once email delivery is confirmed working.
 export async function checkEmailConfig() {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, NOTIFY_EMAIL } = process.env;
+  const { RESEND_API_KEY, NOTIFY_EMAIL } = process.env;
   const present = {
-    SMTP_HOST: Boolean(SMTP_HOST),
-    SMTP_PORT: Boolean(SMTP_PORT),
-    SMTP_USER: Boolean(SMTP_USER),
-    SMTP_PASS: Boolean(SMTP_PASS),
+    RESEND_API_KEY: Boolean(RESEND_API_KEY),
     NOTIFY_EMAIL: Boolean(NOTIFY_EMAIL),
   };
 
-  const t = getTransporter();
-  if (!t) {
-    return { present, verified: false, verifyError: "Transporter not created — one or more SMTP_* vars missing." };
+  if (!RESEND_API_KEY) {
+    return { present, verified: false, verifyError: "RESEND_API_KEY not set." };
   }
 
-  try {
-    await t.verify();
-    return { present, verified: true, verifyError: null };
-  } catch (err) {
-    return { present, verified: false, verifyError: err.message };
-  }
+  // Sending-only API keys (the recommended, least-privilege kind) can't call
+  // most other Resend endpoints, so there's no cheap way to validate the key
+  // without actually sending mail. Presence of both vars is as far as we
+  // check here; real delivery is confirmed by sendNotification's own logging.
+  return { present, verified: null, verifyError: null };
 }
 
 export async function sendNotification({ subject, text }) {
-  const t = getTransporter();
-  if (!t) return;
+  const { RESEND_API_KEY, RESEND_FROM_EMAIL, NOTIFY_EMAIL } = process.env;
 
-  const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
+  if (!RESEND_API_KEY) {
+    if (!warnedMissingConfig) {
+      console.warn("[email] RESEND_API_KEY not set — submission notifications are disabled. See backend/.env.example.");
+      warnedMissingConfig = true;
+    }
+    return;
+  }
+
+  const to = NOTIFY_EMAIL;
+  if (!to) {
+    console.warn("[email] NOTIFY_EMAIL not set — skipping notification.");
+    return;
+  }
 
   try {
-    await t.sendMail({
-      from: `"Site Notifications" <${process.env.SMTP_USER}>`,
-      to,
-      subject,
-      text,
+    const res = await fetch(RESEND_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: `Site Notifications <${RESEND_FROM_EMAIL || DEFAULT_FROM}>`,
+        to,
+        subject,
+        text,
+      }),
     });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("[email] Resend API error:", res.status, body);
+    }
   } catch (err) {
     // A failed notification email should never break the form submission
     // itself — the row is already saved in SQLite either way.
