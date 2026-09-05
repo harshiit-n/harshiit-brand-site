@@ -23,7 +23,7 @@ export default function Footer() {
 
         <div className="flex gap-4 text-sm">
           <a
-            href="https://www.linkedin.com/in/harshiit-nemani55519623b"
+            href="https://www.linkedin.com/in/harshiitnemani"
             target="_blank"
             rel="noreferrer"
             className="link-underline inline-block hover:text-white transition-colors"
