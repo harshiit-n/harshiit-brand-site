@@ -19,7 +19,7 @@ export default function Hero() {
         <img
           src={headshotCutout}
           alt="Harshiit Nemani"
-          className="mt-10 w-[70%] object-contain"
+          className="mt-14 w-[60%] object-contain"
         />
       </div>
 
