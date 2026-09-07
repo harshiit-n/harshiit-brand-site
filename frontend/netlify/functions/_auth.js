@@ -3,7 +3,7 @@
 // WWW-Authenticate response header, since sending it makes browsers pop up
 // their own native credential prompt on top of a custom login form calling
 // this from fetch().
-export function checkAdminAuth(event) {
+export function checkAdminAuth(request) {
   const user = process.env.ADMIN_USER;
   const pass = process.env.ADMIN_PASSWORD;
 
@@ -11,7 +11,7 @@ export function checkAdminAuth(event) {
     return { ok: false, status: 503, error: "Admin routes are disabled. Set ADMIN_USER and ADMIN_PASSWORD." };
   }
 
-  const header = event.headers?.authorization || event.headers?.Authorization || "";
+  const header = request.headers.get("authorization") || "";
   const [scheme, encoded] = header.split(" ");
   if (scheme !== "Basic" || !encoded) {
     return { ok: false, status: 401, error: "Authentication required." };
