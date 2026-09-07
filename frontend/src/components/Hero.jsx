@@ -1,6 +1,9 @@
 import headshotCutout from "../assets/headshot-cutout-tight.png";
+import useTrackedClick from "../hooks/useTrackedClick";
 
 export default function Hero() {
+  const onBookingClick = useTrackedClick("booking_link_clicked", "hero");
+
   return (
     <section
       id="top"
@@ -44,6 +47,7 @@ export default function Hero() {
               href="https://calendly.com/harshiitnemani/30min"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={onBookingClick}
               className="btn-lift inline-block bg-[var(--color-accent)] px-8 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[var(--color-accent-dark)]"
             >
               Book a Call

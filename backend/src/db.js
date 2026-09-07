@@ -18,6 +18,7 @@ db.exec(`
     email TEXT NOT NULL,
     firm TEXT,
     message TEXT NOT NULL,
+    ref_token TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -49,5 +50,12 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+
+// Migration for databases created before ref_token existed — SQLite has no
+// "ADD COLUMN IF NOT EXISTS", so check first.
+const contactColumns = db.prepare("PRAGMA table_info(contact_submissions)").all();
+if (!contactColumns.some((c) => c.name === "ref_token")) {
+  db.exec("ALTER TABLE contact_submissions ADD COLUMN ref_token TEXT");
+}
 
 export default db;

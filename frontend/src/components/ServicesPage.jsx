@@ -2,6 +2,7 @@ import { useState } from "react";
 import Reveal from "./Reveal";
 import ExpertRequestForm from "./ExpertRequestForm";
 import SectionIndex from "./SectionIndex";
+import useTrackedClick from "../hooks/useTrackedClick";
 
 const SOURCING_STEPS = [
   { n: "01", title: "Define", body: "We lock down your mandate together: sector, size, geography, and deal structure." },
@@ -23,6 +24,7 @@ const SERVICES_SECTIONS = [
 
 export default function ServicesPage() {
   const [focus, setFocus] = useState("both"); // "both" | "sourcing" | "network"
+  const onBookingClick = useTrackedClick("booking_link_clicked", "services");
 
   function choose(next) {
     setFocus((current) => (current === next ? "both" : next));
@@ -202,6 +204,7 @@ export default function ServicesPage() {
             href="https://calendly.com/harshiitnemani/30min"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={onBookingClick}
             className="btn-lift inline-block bg-[var(--color-navy)] px-8 py-4 text-sm font-medium text-white transition-colors hover:bg-[var(--color-navy-light)]"
           >
             Book a Call

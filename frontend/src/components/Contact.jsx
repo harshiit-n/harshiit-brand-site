@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Reveal from "./Reveal";
 import { submitContact } from "../lib/api";
+import { useAttribution } from "../lib/attribution";
+import { trackEvent } from "../lib/analytics";
 
 const EMPTY = { name: "", email: "", firm: "", message: "" };
 
@@ -8,6 +10,7 @@ export default function Contact() {
   const [form, setForm] = useState(EMPTY);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const { token, track } = useAttribution();
 
   function update(field) {
     return (e) => setForm({ ...form, [field]: e.target.value });
@@ -18,7 +21,11 @@ export default function Contact() {
     setStatus("loading");
     setError("");
     try {
-      await submitContact(form);
+      await submitContact({ ...form, ref: token || undefined });
+      // Only fires once the backend has actually confirmed the row was
+      // saved — a failed submission (caught below) never reaches this line.
+      trackEvent("contact_submitted", { page_key: "contact" });
+      track("contact_submitted", "contact");
       setStatus("success");
       setForm(EMPTY);
     } catch (err) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Monogram from "./Monogram";
+import useTrackedClick from "../hooks/useTrackedClick";
 
 const LINKS = [
   { to: "/#about", label: "About" },
@@ -14,6 +15,7 @@ const LINKS = [
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const onBookingClick = useTrackedClick("booking_link_clicked", "nav");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -52,6 +54,7 @@ export default function Nav() {
             href="https://calendly.com/harshiitnemani/30min"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={onBookingClick}
             className={`btn-lift text-sm font-medium px-4 py-2 rounded-md transition-colors ${
               scrolled
                 ? "bg-[var(--color-navy)] text-white hover:bg-[var(--color-navy-light)]"
@@ -103,7 +106,10 @@ export default function Nav() {
             href="https://calendly.com/harshiitnemani/30min"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              onBookingClick();
+              setOpen(false);
+            }}
             className="btn-lift text-sm font-medium bg-[var(--color-navy)] text-white px-4 py-2 rounded-md text-center"
           >
             Book a Call

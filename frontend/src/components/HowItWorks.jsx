@@ -1,4 +1,8 @@
+import { useEffect, useRef } from "react";
 import Reveal from "./Reveal";
+import useTrackedClick from "../hooks/useTrackedClick";
+import { useAttribution } from "../lib/attribution";
+import { trackEvent } from "../lib/analytics";
 
 const STEPS = [
   {
@@ -19,8 +23,31 @@ const STEPS = [
 ];
 
 export default function HowItWorks() {
+  const onBookingClick = useTrackedClick("booking_link_clicked", "how-it-works");
+  const { track } = useAttribution();
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            trackEvent("methodology_view", { page_key: "how-it-works" });
+            track("methodology_view", "how-it-works");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [track]);
+
   return (
-    <section id="how-it-works" className="py-24 bg-[var(--color-offwhite)]">
+    <section id="how-it-works" ref={sectionRef} className="py-24 bg-[var(--color-offwhite)]">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
           <h2 className="text-sm font-semibold tracking-[0.2em] text-[var(--color-charcoal)] uppercase mb-3">
@@ -46,6 +73,7 @@ export default function HowItWorks() {
             href="https://calendly.com/harshiitnemani/30min"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={onBookingClick}
             className="btn-lift inline-block bg-[var(--color-navy)] text-white font-medium px-6 py-3 rounded-md hover:bg-[var(--color-navy-light)] transition-colors"
           >
             Book a Discovery Call

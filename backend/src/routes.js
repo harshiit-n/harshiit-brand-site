@@ -13,15 +13,20 @@ router.post("/contact", (req, res) => {
   const email = cleanString(req.body?.email, 254);
   const firm = cleanString(req.body?.firm, 200);
   const message = cleanString(req.body?.message, 4000);
+  // Optional per-recipient attribution token (Step C tracking) — best
+  // effort only, so a malformed value is just dropped rather than
+  // rejecting an otherwise-valid submission.
+  const rawRef = cleanString(req.body?.ref, 64);
+  const ref = /^[a-f0-9]{16,64}$/i.test(rawRef) ? rawRef : null;
 
   if (!name || !isValidEmail(email) || !message) {
     return res.status(400).json({ error: "Please provide your name, a valid email, and a message." });
   }
 
   const stmt = db.prepare(
-    "INSERT INTO contact_submissions (name, email, firm, message) VALUES (?, ?, ?, ?)"
+    "INSERT INTO contact_submissions (name, email, firm, message, ref_token) VALUES (?, ?, ?, ?, ?)"
   );
-  const info = stmt.run(name, email, firm || null, message);
+  const info = stmt.run(name, email, firm || null, message, ref);
 
   sendNotification({
     subject: `New contact form submission from ${name}`,
