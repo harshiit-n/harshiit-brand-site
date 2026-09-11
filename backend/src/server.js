@@ -6,9 +6,9 @@ import routes from "./routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || "*").split(",").map((o) => o.trim());
 
-app.use(cors({ origin: ALLOWED_ORIGIN }));
+app.use(cors({ origin: ALLOWED_ORIGINS.includes("*") ? "*" : ALLOWED_ORIGINS }));
 app.use(express.json({ limit: "50kb" }));
 
 // Basic abuse protection on the public form endpoints — 20 requests per
