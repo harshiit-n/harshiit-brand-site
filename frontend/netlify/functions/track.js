@@ -19,7 +19,13 @@ const ALLOWED_EVENTS = new Set([
   "contact_submitted",
 ]);
 const ALLOWED_ORIGINS = new Set(
-  [process.env.URL, process.env.DEPLOY_PRIME_URL, "https://harshiitnemani.netlify.app"].filter(Boolean)
+  [
+    process.env.URL,
+    process.env.DEPLOY_PRIME_URL,
+    "https://harshiitnemani.consulting",
+    "https://www.harshiitnemani.consulting",
+    "https://harshiitnemani.netlify.app",
+  ].filter(Boolean)
 );
 const MAX_BODY_BYTES = 2000;
 const TOKEN_RE = /^[a-f0-9]{32,64}$/i;

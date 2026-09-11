@@ -2,7 +2,7 @@ import { randomBytes, createHash } from "node:crypto";
 import { getSql } from "./_db.js";
 import { checkAdminAuth } from "./_auth.js";
 
-const SITE_URL = process.env.URL || "https://harshiitnemani.netlify.app";
+const SITE_URL = process.env.URL || "https://harshiitnemani.consulting";
 const EXPIRES_DAYS = 180;
 
 function json(status, body) {
