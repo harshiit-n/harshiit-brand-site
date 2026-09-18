@@ -22,6 +22,14 @@ const TRANSPARENT_GIF = Buffer.from(
 );
 const TOKEN_RE = /^[a-f0-9]{32,64}$/i;
 
+// The Gmail extension inserts the pixel as a live <img> into the compose
+// window's own contenteditable body, so the sender's own browser loads it
+// immediately to render it — seconds before the message is actually sent.
+// That self-fetch hits this endpoint just like a real recipient open would.
+// Skip anything this close to creation; a genuine open takes at least this
+// long for the mail to be delivered and opened.
+const SENDER_PREVIEW_WINDOW_MS = 30_000;
+
 function hashToken(token) {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -49,15 +57,18 @@ export default async (request) => {
     const sql = getSql();
     const tokenHash = hashToken(token);
     const rows = await sql`
-      SELECT id FROM outreach_messages
+      SELECT id, sent_at FROM outreach_messages
       WHERE token_hash = ${tokenHash} AND expires_at > now()
       LIMIT 1
     `;
     if (rows.length > 0) {
-      await sql`
-        INSERT INTO visit_events (message_id, event_name, page_key, event_id, confidence)
-        VALUES (${rows[0].id}, 'email_opened', 'email', ${randomUUID()}, 'approximate')
-      `;
+      const sinceSent = Date.now() - new Date(rows[0].sent_at).getTime();
+      if (sinceSent >= SENDER_PREVIEW_WINDOW_MS) {
+        await sql`
+          INSERT INTO visit_events (message_id, event_name, page_key, event_id, confidence)
+          VALUES (${rows[0].id}, 'email_opened', 'email', ${randomUUID()}, 'approximate')
+        `;
+      }
     }
   } catch (err) {
     console.error("[open] error:", err.message);
