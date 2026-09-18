@@ -22,13 +22,19 @@ const TRANSPARENT_GIF = Buffer.from(
 );
 const TOKEN_RE = /^[a-f0-9]{32,64}$/i;
 
-// The Gmail extension inserts the pixel as a live <img> into the compose
-// window's own contenteditable body, so the sender's own browser loads it
-// immediately to render it — seconds before the message is actually sent.
-// That self-fetch hits this endpoint just like a real recipient open would.
-// Skip anything this close to creation; a genuine open takes at least this
-// long for the mail to be delivered and opened.
-const SENDER_PREVIEW_WINDOW_MS = 30_000;
+// Two distinct self-fetches happen before any recipient ever sees the mail:
+// (1) the Gmail extension inserts the pixel as a live <img> into the compose
+// window's own contenteditable body, so the sender's browser loads it within
+// seconds to render it; (2) tens of seconds later, Gmail's own backend
+// re-renders the just-sent message into the sender's Sent/thread view and
+// fetches every embedded image again to do so — independent of the
+// recipient. Because the response below is marked no-store, that re-render
+// hits this endpoint fresh instead of serving a cached copy, so it shows up
+// here just like a real open. Measured against real traffic, that second
+// wave lands 40-300s after send, while genuine recipient opens start well
+// past 10 minutes — so anything inside this window is a self-fetch, not a
+// real open.
+const SENDER_PREVIEW_WINDOW_MS = 10 * 60_000;
 
 function hashToken(token) {
   return createHash("sha256").update(token).digest("hex");
